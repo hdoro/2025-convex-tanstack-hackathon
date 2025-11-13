@@ -1,0 +1,7 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*"
+      run: pnpm exec biome check --fix --files-ignore-unknown=true --no-errors-on-unmatched --staged {staged_files}
+      stage_fixed: true

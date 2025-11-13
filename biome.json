@@ -1,0 +1,69 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true,
+		"defaultBranch": "main"
+	},
+	"files": {
+		"includes": [
+			"**/*",
+			"!gitignored",
+			"!node_modules",
+			"!dist",
+			"!convex/_generated",
+			"!convex/auth/_generated",
+			"!build",
+			"!.source",
+			"!pnpm-lock.yaml",
+			"!**/src/routeTree.gen.ts",
+			"!**/src/styles.css"
+		]
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"a11y": {
+				"noSvgWithoutTitle": "off"
+			},
+			"complexity": {
+				"noForEach": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn",
+				"noArrayIndexKey": "warn"
+			},
+			"correctness": {
+				"noUnusedImports": { "fix": "safe", "level": "error", "options": {} },
+				"noChildrenProp": "off"
+			},
+			"nursery": {
+				"useSortedClasses": { "fix": "safe", "level": "warn", "options": {} }
+			}
+		},
+		"includes": ["**", "!**/src/playground/**/*"]
+	},
+	"formatter": {
+		"enabled": true
+	},
+	"css": {
+		"linter": { "enabled": false },
+		"parser": {
+			"cssModules": true,
+			"tailwindDirectives": true
+		},
+		"formatter": {
+			"indentWidth": 2
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"semicolons": "asNeeded",
+			"quoteStyle": "single",
+			"trailingCommas": "all"
+		}
+	}
+}
