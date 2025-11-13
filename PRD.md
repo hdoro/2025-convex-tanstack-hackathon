@@ -66,7 +66,7 @@ Timer {
   createdAt: timestamp
 }
 
-TimerEvent = 
+TimerEvent =
   | { type: 'started', timestamp: number }
   | { type: 'paused', timestamp: number }
   | { type: 'resumed', timestamp: number }
@@ -141,9 +141,7 @@ function computeTimerState(timer: Timer): {
 
 ### Session States
 ```
-JOINING → QUESTIONS → ACTIVE_CYCLE → BREAK → QUESTIONS → ACTIVE_CYCLE
-    ↓         ↓           ↓           ↓        ↓
-  EXIT ← DEBRIEF ← COMPLETED ← QUESTIONS ← EXIT
+JOINING → SESSION_INTENTION_QUESTIONS → CYCLE_INTENTION_QUESTIONS -> ACTIVE_CYCLE → CYCLE_DEBRIEF -> BREAK → CYCLE_INTENTION_QUESTIONS → ACTIVE_CYCLE → EXIT/CONTINUE → (IF EXIT) SESSION_DEBRIEF
 ```
 
 ### Route Structure
@@ -196,6 +194,48 @@ JOINING → QUESTIONS → ACTIVE_CYCLE → BREAK → QUESTIONS → ACTIVE_CYCLE
 - Reactive UI updates across all clients
 - Local timer state computation (100ms intervals)
 
+## Questions to ask from users
+
+### Room creation
+
+- Cycle duration (default to 40min)
+- Break duration (default to 7.5min)
+- Visibility: Public / Private
+  - If private, no one else can join the link
+
+### Session intention
+
+All questions are optional:
+
+- What am I trying to accomplish? (textarea)
+- Why is this important and valuable? (textarea)
+- How will I know this is complete? (textarea)
+- Any risks/hazards? (Potential distractions, procrastination, etc.) (textarea)
+- Is this concrete/measurable or subjective/ambiguous? -> radio: either Concrete/Measurable or Subjective/Ambiguous
+
+### Session debrief
+
+- What did I get done in this session? (textarea)
+- How did this compare to my normal work output? (textarea)
+- Did I get bogged down? Where? (textarea)
+- What went well? How can I replicate this in the future? (textarea)
+- Any other takeaways? Lessons to share with others? (textarea)
+
+### Cycle intention
+
+- (required) What am I trying to accomplish this cycle? (textarea)
+- How will I get started? (textarea)
+- Any hazards present? (textarea)
+- (required) Energy Level: radio: low / mid / high
+- (required) Morale Level: radio: low / mid / high
+
+### Cycle debrief
+
+- (required) Completed cycle's target? Yes / No
+- Anything noteworthy? (textarea)
+- Any distractions? (textarea)
+- Things to improve for next cycle? (textarea)
+
 ## Post-MVP Features (Future Scope)
 - [ ] Custom question sets per session
 - [ ] Video calls during breaks (Jitsi integration)
@@ -221,9 +261,6 @@ JOINING → QUESTIONS → ACTIVE_CYCLE → BREAK → QUESTIONS → ACTIVE_CYCLE
 - Optimistic locking for concurrent timer operations
 
 ## Open Questions
-1. Question content specifics (to be provided)
-2. Exact audio notification patterns
-3. Session debrief question priority
-4. Analytics depth for authenticated users
-5. Default timer durations (40min work + 5min break confirmed?)
-6. Timer event retention policy (keep all events or prune old ones?)
+
+1. Exact audio notification patterns
+2. Timer event retention policy (keep all events or prune old ones?)
