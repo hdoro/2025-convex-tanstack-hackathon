@@ -1,7 +1,7 @@
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react'
 import { ConvexQueryClient } from '@convex-dev/react-query'
 import { authClient } from '@/lib/auth-client'
-import { ENV } from '@/lib/constants'
+import { ENV } from '@/lib/constants.client'
 
 const convexQueryClient = new ConvexQueryClient(ENV.CONVEX_URL)
 

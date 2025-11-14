@@ -2,6 +2,7 @@ import type { GenericCtx } from '@convex-dev/better-auth'
 import { convex } from '@convex-dev/better-auth/plugins'
 import { betterAuth } from 'better-auth'
 import { anonymous, magicLink } from 'better-auth/plugins'
+import { DB_TRUSTED_ORIGINS } from '@/lib/constants.db'
 import type { DataModel } from './_generated/dataModel'
 import { authComponent } from './auth/client'
 
@@ -22,9 +23,9 @@ export const createAuth = (
 		logger: {
 			disabled: optionsOnly,
 		},
-		// trustedOrigins: DB_TRUSTED_ORIGINS,
+		trustedOrigins: DB_TRUSTED_ORIGINS,
 		database: authComponent.adapter(ctx),
-		baseURL: process.env.SITE_URL,
+		baseURL: DB_TRUSTED_ORIGINS[0],
 		account: {
 			accountLinking: {
 				enabled: true,
