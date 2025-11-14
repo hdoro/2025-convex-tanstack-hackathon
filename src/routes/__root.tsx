@@ -19,7 +19,14 @@ import { getCookie, getRequest } from '@tanstack/react-start/server'
 import type { ConvexReactClient } from 'convex/react'
 import type { PropsWithChildren } from 'react'
 import { SettingsMenu } from '@/components/settings-menu'
+import { getRandomItemFromArray } from '@/lib/arrays'
 import { authClient } from '@/lib/auth-client'
+import { THEME_COOKIE_KEY } from '@/lib/constants'
+import {
+	getLocaleFromRequest,
+	setupLocaleFromRequest,
+} from '@/lib/i18n/i18n.server'
+import { isValidTheme, type Theme, themes } from '@/lib/themes'
 import Providers from '@/providers/providers'
 import ThemeProvider from '@/providers/theme-provider'
 import StoreDevtools from '../lib/demo-store-devtools'
@@ -35,6 +42,19 @@ const fetchAuth = createServerFn({ method: 'GET' }).handler(async () => {
 		userId: session?.user.id,
 		token,
 	}
+})
+
+const fetchLocale = createServerFn({ method: 'GET' }).handler(async () => {
+	await setupLocaleFromRequest()
+	return getLocaleFromRequest()
+})
+
+const fetchTheme = createServerFn({ method: 'GET' }).handler(async () => {
+	const storedTheme = getCookie(THEME_COOKIE_KEY)
+
+	if (storedTheme && isValidTheme(storedTheme)) return storedTheme
+
+	return getRandomItemFromArray(Object.keys(themes)) as Theme
 })
 
 export const Route = createRootRouteWithContext<{
@@ -65,13 +85,17 @@ export const Route = createRootRouteWithContext<{
 	beforeLoad: async (ctx) => {
 		// all queries, mutations and action made with TanStack Query will be
 		// authenticated by an identity token.
-		const { userId, token } = await fetchAuth()
+		const [{ userId, token }, theme, locale] = await Promise.all([
+			fetchAuth(),
+			fetchTheme(),
+			fetchLocale(),
+		] as const)
 		// During SSR only (the only time serverHttpClient exists),
 		// set the auth token to make HTTP queries with.
 		if (token) {
 			ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
 		}
-		return { userId, token }
+		return { userId, token, theme, locale }
 	},
 
 	component: RootComponent,
@@ -84,8 +108,8 @@ function RootComponent() {
 			client={context.convexClient}
 			authClient={authClient}
 		>
-			<Providers>
-				<RootDocument>
+			<Providers convexClient={context.convexClient} locale={context.locale}>
+				<RootDocument theme={context.theme}>
 					<Outlet />
 				</RootDocument>
 			</Providers>
@@ -93,7 +117,7 @@ function RootComponent() {
 	)
 }
 
-function RootDocument(props: PropsWithChildren) {
+function RootDocument(props: PropsWithChildren<{ theme: Theme }>) {
 	const { i18n } = useLingui()
 	return (
 		<html lang={i18n.locale}>
@@ -101,7 +125,8 @@ function RootDocument(props: PropsWithChildren) {
 				<HeadContent />
 			</head>
 			<body>
-				<ThemeProvider>
+				<ThemeProvider theme={props.theme}>
+					<h1>Here</h1>
 					<SettingsMenu />
 					{props.children}
 					<TanStackDevtools

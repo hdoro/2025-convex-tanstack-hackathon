@@ -4,41 +4,40 @@ import {
 	setResponseHeader,
 } from '@tanstack/react-start/server'
 import { parse, serialize } from 'cookie-es'
+import { LOCALE_COOKIE_KEY } from '../constants'
+import type { SupportedLocale } from '../schemas'
+import { DEFAULT_LOCALE, dynamicActivate, isSupportedLocale } from './i18n'
 
-import { DEFAULT_LOCALE, dynamicActivate, isLocaleValid } from './i18n'
+export function serializeLocaleCookie(locale: SupportedLocale) {
+	return serialize(LOCALE_COOKIE_KEY, locale, {
+		sameSite: true,
+		secure: true,
+		// 1 full year
+		maxAge: 365 * 24 * 60 * 60,
+		path: '/',
+	})
+}
 
-function getLocaleFromRequest() {
+export function getLocaleFromRequest() {
 	const request = getRequest()
 	const cookie = parse(getRequestHeader('Cookie') ?? '')
 
 	if (request) {
 		const url = new URL(request.url)
-		const queryLocale = url.searchParams.get('locale') ?? ''
+		const queryLocale = url.searchParams.get(LOCALE_COOKIE_KEY) ?? ''
 
-		if (isLocaleValid(queryLocale)) {
-			setResponseHeader(
-				'Set-Cookie',
-				serialize('locale', queryLocale, {
-					maxAge: 30 * 24 * 60 * 60,
-					path: '/',
-				}),
-			)
+		if (isSupportedLocale(queryLocale)) {
+			setResponseHeader('Set-Cookie', serializeLocaleCookie(queryLocale))
 
 			return queryLocale
 		}
 	}
 
-	if (cookie.locale && isLocaleValid(cookie.locale)) {
+	if (cookie.locale && isSupportedLocale(cookie.locale)) {
 		return cookie.locale
 	}
 
-	setResponseHeader(
-		'Set-Cookie',
-		serialize('locale', DEFAULT_LOCALE, {
-			maxAge: 30 * 24 * 60 * 60,
-			path: '/',
-		}),
-	)
+	setResponseHeader('Set-Cookie', serializeLocaleCookie(DEFAULT_LOCALE))
 
 	return DEFAULT_LOCALE
 }

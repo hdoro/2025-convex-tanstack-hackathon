@@ -1,21 +1,19 @@
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react'
-import { ConvexQueryClient } from '@convex-dev/react-query'
+import type { ConvexReactClient } from 'convex/react'
+import type { PropsWithChildren } from 'react'
 import { authClient } from '@/lib/auth-client'
-import { ENV } from '@/lib/constants.client'
 
-const convexQueryClient = new ConvexQueryClient(ENV.CONVEX_URL)
-
-export default function AppConvexProvider({
-	children,
-}: {
-	children: React.ReactNode
-}) {
+export default function AppConvexProvider(
+	props: PropsWithChildren<{
+		convexClient: ConvexReactClient
+	}>,
+) {
 	return (
 		<ConvexBetterAuthProvider
-			client={convexQueryClient.convexClient}
+			client={props.convexClient}
 			authClient={authClient}
 		>
-			{children}
+			{props.children}
 		</ConvexBetterAuthProvider>
 	)
 }

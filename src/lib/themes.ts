@@ -1,6 +1,8 @@
 // Credits: Sahaj Jain from Tweakcn
 // Original source: https://github.com/jnsahaj/tweakcn/blob/main/utils/theme-presets.ts
 
+import { Schema } from 'effect'
+
 export type ThemeStyleProps = {
 	/** The default background color, paired with `foreground`. */
 	background: string
@@ -90,7 +92,7 @@ export type ThemePreset = {
 	}
 }
 
-export const defaultThemePresets = {
+export const themes = {
 	'modern-minimal': {
 		label: 'Modern Minimal',
 		styles: {
@@ -3689,8 +3691,11 @@ export const defaultThemePresets = {
 	},
 } as const satisfies Record<string, ThemePreset>
 
-export type DefaultThemePreset = keyof typeof defaultThemePresets
+export const Theme = Schema.Literal(
+	...(Object.keys(themes) as (keyof typeof themes)[]),
+)
+export type Theme = typeof Theme.Type
 
-export function isValidThemePreset(theme: string): theme is DefaultThemePreset {
-	return theme in defaultThemePresets
+export function isValidTheme(theme: string): theme is Theme {
+	return theme in themes
 }

@@ -1,13 +1,13 @@
 import type { CSSProperties } from 'react'
 import type { ColorMode } from '@/hooks/use-color-mode'
-import { type DefaultThemePreset, defaultThemePresets } from './theme-presets'
+import { type Theme, themes } from './themes'
 
 export function themePresetToCssCustomProperties(
-	themePreset: DefaultThemePreset,
+	theme: Theme,
 	colorMode: ColorMode,
 ): CSSProperties {
-	const theme = defaultThemePresets[themePreset]
-	const prefixedVariables = Object.entries(theme.styles[colorMode]).map(
+	const themeConfig = themes[theme]
+	const prefixedVariables = Object.entries(themeConfig.styles[colorMode]).map(
 		([key, value]) => [`--${key}`, value],
 	)
 

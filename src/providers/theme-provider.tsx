@@ -1,3 +1,7 @@
+import { createServerFn } from '@tanstack/react-start'
+import { setResponseHeader } from '@tanstack/react-start/server'
+import { serialize } from 'cookie-es'
+import { Schema } from 'effect'
 import {
 	createContext,
 	type PropsWithChildren,
@@ -5,38 +9,33 @@ import {
 	useState,
 } from 'react'
 import { useColorMode } from '@/hooks/use-color-mode'
-import { getRandomItemFromArray } from '@/lib/arrays'
-import { THEME_STORAGE_KEY } from '@/lib/constants'
+import { THEME_COOKIE_KEY } from '@/lib/constants'
 import { themePresetToCssCustomProperties } from '@/lib/theme-helpers'
-import {
-	type DefaultThemePreset,
-	defaultThemePresets,
-	isValidThemePreset,
-} from '@/lib/theme-presets'
-
-// @TODO: solution that works in SSR (cookie, not local storage; follow example of the solution we land on for lingui)
-const initialTheme = (() => {
-	if (typeof window !== 'undefined' && !!localStorage) {
-		const savedTheme = localStorage.getItem(THEME_STORAGE_KEY)
-		if (savedTheme && isValidThemePreset(savedTheme)) return savedTheme
-	}
-	return getRandomItemFromArray(
-		Object.keys(defaultThemePresets),
-	) as DefaultThemePreset
-})()
+import { Theme } from '@/lib/themes'
 
 const ThemeContext = createContext<{
-	theme: DefaultThemePreset
-	setTheme: (theme: DefaultThemePreset) => void
-}>({ theme: initialTheme, setTheme: () => {} })
+	theme: Theme
+	setTheme: (theme: Theme) => Promise<void>
+}>({ theme: 'amber-minimal', setTheme: async () => {} })
 
 export const useTheme = () => useContext(ThemeContext)
 
-export default function ThemeProvider(props: PropsWithChildren) {
-	const [theme, setTheme] = useState<DefaultThemePreset>(initialTheme)
+export default function ThemeProvider(
+	props: PropsWithChildren<{ theme: Theme }>,
+) {
+	const [theme, setTheme] = useState<Theme>(props.theme)
 	const colorMode = useColorMode()
+
+	async function onThemeChange(theme: Theme) {
+		setTheme(theme)
+		try {
+			setThemeCookie({ data: { theme } })
+		} catch (error) {
+			console.error('Failed setting theme cookie', error)
+		}
+	}
 	return (
-		<ThemeContext.Provider value={{ theme, setTheme }}>
+		<ThemeContext.Provider value={{ theme, setTheme: onThemeChange }}>
 			<div
 				className="contents"
 				style={themePresetToCssCustomProperties(theme, colorMode)}
@@ -46,3 +45,24 @@ export default function ThemeProvider(props: PropsWithChildren) {
 		</ThemeContext.Provider>
 	)
 }
+
+export const setThemeCookie = createServerFn({ method: 'POST' })
+	.inputValidator(
+		Schema.standardSchemaV1(
+			Schema.Struct({
+				theme: Theme,
+			}),
+		),
+	)
+	.handler(async ({ data: { theme } }) => {
+		setResponseHeader(
+			'Set-Cookie',
+			serialize(THEME_COOKIE_KEY, theme, {
+				sameSite: true,
+				secure: true,
+				path: '/',
+			}),
+		)
+
+		return { success: true }
+	})

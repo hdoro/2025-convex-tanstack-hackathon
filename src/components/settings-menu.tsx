@@ -8,14 +8,16 @@ import {
 	MenubarSeparator,
 	MenubarTrigger,
 } from '@/components/ui/menubar'
-import { dynamicActivate } from '@/lib/i18n/i18n'
+import { isSupportedLocale } from '@/lib/i18n/i18n'
 import { LOCALE_LABELS } from '@/lib/labels'
 import { SupportedLocale } from '@/lib/schemas'
-import { defaultThemePresets, isValidThemePreset } from '@/lib/theme-presets'
+import { isValidTheme, themes } from '@/lib/themes'
+import { useLocale } from '@/providers/localization-provider'
 import { useTheme } from '@/providers/theme-provider'
 
 export function SettingsMenu() {
-	const { t, i18n } = useLingui()
+	const { t } = useLingui()
+	const { locale, setLocale } = useLocale()
 	const { theme, setTheme } = useTheme()
 	return (
 		<Menubar>
@@ -23,8 +25,10 @@ export function SettingsMenu() {
 				<MenubarTrigger>{t`Language`}</MenubarTrigger>
 				<MenubarContent>
 					<MenubarRadioGroup
-						value={i18n.locale}
-						onValueChange={(locale) => dynamicActivate(locale)}
+						value={locale}
+						onValueChange={(newLocale) =>
+							isSupportedLocale(newLocale) && setLocale(newLocale)
+						}
 					>
 						{SupportedLocale.literals.map((locale) => (
 							<MenubarRadioItem key={locale} value={locale}>
@@ -40,11 +44,11 @@ export function SettingsMenu() {
 				<MenubarContent>
 					<MenubarRadioGroup
 						value={theme}
-						onValueChange={(theme) =>
-							isValidThemePreset(theme) && setTheme(theme)
+						onValueChange={(newTheme) =>
+							isValidTheme(newTheme) && setTheme(newTheme)
 						}
 					>
-						{Object.entries(defaultThemePresets).map(([preset, { label }]) => (
+						{Object.entries(themes).map(([preset, { label }]) => (
 							<MenubarRadioItem key={preset} value={preset}>
 								{label}
 							</MenubarRadioItem>
