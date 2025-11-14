@@ -4,7 +4,14 @@ import type {
 	CycleIntention,
 	SessionDebrief,
 	SessionIntention,
+	SupportedLocale,
 } from './schemas'
+
+export const LOCALE_LABELS: Record<SupportedLocale, string> = {
+	en: 'English',
+	pt: 'Português',
+	es: 'Español',
+}
 
 export const CYCLE_DEBRIEF_LABELS: Record<
 	keyof CycleDebrief,

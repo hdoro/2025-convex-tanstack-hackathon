@@ -43,7 +43,7 @@ export const update = mutation({
 		Effect.gen(function* () {
 			const { db } = yield* ConfectMutationCtx
 			yield* db.patch(id, toUpdate)
-			// @TODO get current
+			// @TODO get current user and ensure only the creator can modify the room
 
 			return null
 		}),

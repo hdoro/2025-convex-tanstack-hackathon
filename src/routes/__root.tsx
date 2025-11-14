@@ -3,7 +3,9 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import type { PropsWithChildren } from 'react'
+import { SettingsMenu } from '@/components/settings-menu'
 import Providers from '@/providers/providers'
+import ThemeProvider from '@/providers/theme-provider'
 import StoreDevtools from '../lib/demo-store-devtools'
 import appCss from '../styles.css?url'
 
@@ -44,20 +46,23 @@ function RootDocument(props: PropsWithChildren) {
 				<HeadContent />
 			</head>
 			<body>
-				{props.children}
-				<TanStackDevtools
-					config={{
-						position: 'bottom-right',
-					}}
-					plugins={[
-						{
-							name: 'Tanstack Router',
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-						StoreDevtools,
-					]}
-				/>
-				<Scripts />
+				<ThemeProvider>
+					<SettingsMenu />
+					{props.children}
+					<TanStackDevtools
+						config={{
+							position: 'bottom-right',
+						}}
+						plugins={[
+							{
+								name: 'Tanstack Router',
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+							StoreDevtools,
+						]}
+					/>
+					<Scripts />
+				</ThemeProvider>
 			</body>
 		</html>
 	)
