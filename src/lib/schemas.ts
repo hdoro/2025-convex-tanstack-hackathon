@@ -1,6 +1,9 @@
 import { Id } from '@rjdellecese/confect/server'
 import { Schema } from 'effect'
 
+export const SupportedLocale = Schema.Literal('en', 'es', 'pt')
+export type SupportedLocale = typeof SupportedLocale.Type
+
 export const UserId = Schema.String.pipe(Schema.brand('auth/UserId'))
 export type UserId = typeof UserId.Type
 

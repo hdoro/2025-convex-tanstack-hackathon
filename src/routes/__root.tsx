@@ -1,13 +1,11 @@
+import { useLingui } from '@lingui/react'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-
+import type { PropsWithChildren } from 'react'
+import Providers from '@/providers/providers'
 import Header from '../components/Header'
-
-import ConvexProvider from '../integrations/convex/provider'
-
 import StoreDevtools from '../lib/demo-store-devtools'
-
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -32,32 +30,35 @@ export const Route = createRootRoute({
 		],
 	}),
 
-	shellComponent: RootDocument,
+	shellComponent: (props) => (
+		<Providers>
+			<RootDocument>{props.children}</RootDocument>
+		</Providers>
+	),
 })
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument(props: PropsWithChildren) {
+	const { i18n } = useLingui()
 	return (
-		<html lang="en">
+		<html lang={i18n.locale}>
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				<ConvexProvider>
-					<Header />
-					{children}
-					<TanStackDevtools
-						config={{
-							position: 'bottom-right',
-						}}
-						plugins={[
-							{
-								name: 'Tanstack Router',
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-							StoreDevtools,
-						]}
-					/>
-				</ConvexProvider>
+				<Header />
+				{props.children}
+				<TanStackDevtools
+					config={{
+						position: 'bottom-right',
+					}}
+					plugins={[
+						{
+							name: 'Tanstack Router',
+							render: <TanStackRouterDevtoolsPanel />,
+						},
+						StoreDevtools,
+					]}
+				/>
 				<Scripts />
 			</body>
 		</html>
