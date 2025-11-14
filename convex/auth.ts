@@ -1,7 +1,7 @@
 import type { GenericCtx } from '@convex-dev/better-auth'
 import { convex } from '@convex-dev/better-auth/plugins'
 import { betterAuth } from 'better-auth'
-import { magicLink } from 'better-auth/plugins'
+import { anonymous, magicLink } from 'better-auth/plugins'
 import type { DataModel } from './_generated/dataModel'
 import { authComponent } from './auth/client'
 
@@ -42,6 +42,7 @@ export const createAuth = (
 		},
 		plugins: [
 			convex(),
+			anonymous(),
 			// We don't have email & passwords, only email
 			magicLink({
 				async sendMagicLink(data) {

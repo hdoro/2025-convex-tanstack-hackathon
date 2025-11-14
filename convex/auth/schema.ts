@@ -7,18 +7,18 @@ import { v } from 'convex/values'
 
 export const tables = {
 	user: defineTable({
-		name: v.optional(v.string()),
+		name: v.string(),
 		email: v.string(),
 		emailVerified: v.boolean(),
 		image: v.optional(v.union(v.null(), v.string())),
 		createdAt: v.number(),
 		updatedAt: v.number(),
-		phoneNumber: v.optional(v.union(v.null(), v.string())),
-		phoneNumberVerified: v.optional(v.union(v.null(), v.boolean())),
+		userId: v.optional(v.union(v.null(), v.string())),
+		isAnonymous: v.optional(v.union(v.null(), v.boolean())),
 	})
 		.index('email_name', ['email', 'name'])
 		.index('name', ['name'])
-		.index('phoneNumber', ['phoneNumber']),
+		.index('userId', ['userId']),
 	session: defineTable({
 		expiresAt: v.number(),
 		token: v.string(),
