@@ -89,6 +89,9 @@ importers:
       cookie-es:
         specifier: ^2.0.0
         version: 2.0.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       effect:
         specifier: ^3.19.3
         version: 3.19.3
@@ -153,6 +156,9 @@ importers:
       babel-plugin-react-compiler:
         specifier: ^1.0.0
         version: 1.0.0
+      convex-test:
+        specifier: ^0.0.38
+        version: 0.0.38(convex@1.29.1(react@19.2.0))
       jsdom:
         specifier: ^27.2.0
         version: 27.2.0
@@ -3274,6 +3280,11 @@ packages:
       zod:
         optional: true
 
+  convex-test@0.0.38:
+    resolution: {integrity: sha512-1o/3GvUR9gMLjiqq7SxchI/0OYQaWwbQC4INmB1SNt1WLBjUgEM8+brgpqrZwJ+Vb1DdGZokCVeihwT5IPk49w==}
+    peerDependencies:
+      convex: ^1.16.4
+
   convex@1.29.1:
     resolution: {integrity: sha512-0+1/0QjOKJw5pk480HVMfhSKjYOM5dM67Ql5yF6FzrC/09WCXm5UVWd/MU8/OCB0YRgFUhrRsrWFSnW0w7iBSA==}
     engines: {node: '>=18.0.0', npm: '>=7.0.0'}
@@ -3504,6 +3515,10 @@ packages:
 
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
+
+  dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
     engines: {node: '>=12'}
 
   eastasianwidth@0.2.0:
@@ -8890,6 +8905,10 @@ snapshots:
       typescript: 5.9.3
       zod: 3.25.76
 
+  convex-test@0.0.38(convex@1.29.1(react@19.2.0)):
+    dependencies:
+      convex: 1.29.1(react@19.2.0)
+
   convex@1.29.1(react@19.2.0):
     dependencies:
       esbuild: 0.25.4
@@ -9100,6 +9119,8 @@ snapshots:
       type-fest: 4.41.0
 
   dotenv@16.6.1: {}
+
+  dotenv@17.2.3: {}
 
   eastasianwidth@0.2.0: {}
 
