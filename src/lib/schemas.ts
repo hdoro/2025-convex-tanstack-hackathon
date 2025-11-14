@@ -16,7 +16,7 @@ export type TimerEvent = typeof TimerEvent.Type
 
 // Timer with event-sourced state
 export const Timer = Schema.Struct({
-	duration: Schema.Positive,
+	duration: Schema.Duration,
 	events: Schema.Array(TimerEvent),
 	version: Schema.Positive, // for optimistic locking
 })
@@ -63,10 +63,11 @@ export type CycleDebrief = typeof CycleDebrief.Type
 
 export const Room = Schema.Struct({
 	createdBy: UserId,
+	handle: Schema.String,
 	currentPhase: Schema.Literal('work', 'break'),
 	timer: Timer,
-	cycleDuration: Schema.Positive, // in ms, default 40min
-	breakDuration: Schema.Positive, // in ms, default 7.5min
+	cycleDuration: Schema.Duration,
+	breakDuration: Schema.Duration,
 	visibility: Schema.Literal('private', 'public'),
 })
 export type Room = typeof Room.Type
@@ -96,3 +97,16 @@ export const UserProfile = Schema.Struct({
 	avatar: Schema.optional(Schema.String),
 })
 export type UserProfile = typeof UserProfile.Type
+
+// ===============
+// ROOMS ENDPOINTS
+// ===============
+
+export const CreateRoomArgs = Schema.Struct({})
+export const CreateRoomResult = Schema.Struct({
+	handle: Room.fields.handle,
+})
+export const UpdateRoomArgs = Schema.Struct({
+	...Room.omit('createdBy', 'handle').fields,
+	id: Id.Id('rooms'),
+})

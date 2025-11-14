@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as confect from "../confect.js";
 import type * as presence from "../presence.js";
+import type * as rooms from "../rooms.js";
 
 import type {
   ApiFromModules,
@@ -22,6 +23,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   confect: typeof confect;
   presence: typeof presence;
+  rooms: typeof rooms;
 }>;
 
 /**
