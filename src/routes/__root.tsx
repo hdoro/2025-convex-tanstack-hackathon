@@ -4,7 +4,6 @@ import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import type { PropsWithChildren } from 'react'
 import Providers from '@/providers/providers'
-import Header from '../components/Header'
 import StoreDevtools from '../lib/demo-store-devtools'
 import appCss from '../styles.css?url'
 
@@ -45,7 +44,6 @@ function RootDocument(props: PropsWithChildren) {
 				<HeadContent />
 			</head>
 			<body>
-				<Header />
 				{props.children}
 				<TanStackDevtools
 					config={{

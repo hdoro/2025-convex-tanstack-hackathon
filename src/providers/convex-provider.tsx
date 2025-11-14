@@ -1,11 +1,9 @@
+import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react'
 import { ConvexQueryClient } from '@convex-dev/react-query'
-import { ConvexProvider } from 'convex/react'
+import { authClient } from '@/lib/auth-client'
+import { ENV } from '@/lib/constants'
 
-const CONVEX_URL = (import.meta as any).env.VITE_CONVEX_URL
-if (!CONVEX_URL) {
-	console.error('missing envar CONVEX_URL')
-}
-const convexQueryClient = new ConvexQueryClient(CONVEX_URL)
+const convexQueryClient = new ConvexQueryClient(ENV.CONVEX_URL)
 
 export default function AppConvexProvider({
 	children,
@@ -13,8 +11,11 @@ export default function AppConvexProvider({
 	children: React.ReactNode
 }) {
 	return (
-		<ConvexProvider client={convexQueryClient.convexClient}>
+		<ConvexBetterAuthProvider
+			client={convexQueryClient.convexClient}
+			authClient={authClient}
+		>
 			{children}
-		</ConvexProvider>
+		</ConvexBetterAuthProvider>
 	)
 }
