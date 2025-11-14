@@ -7,10 +7,13 @@ export type SupportedLocale = typeof SupportedLocale.Type
 export const UserId = Schema.String.pipe(Schema.brand('auth/UserId'))
 export type UserId = typeof UserId.Type
 
+export const Timestamp = Schema.Positive.pipe(Schema.brand('Timestamp'))
+export type Timestamp = typeof Timestamp.Type
+
 // Timer event types for event-sourced timer
 export const TimerEvent = Schema.Struct({
 	type: Schema.Literal('started', 'paused', 'resumed', 'skipped'),
-	timestamp: Schema.Positive,
+	timestamp: Timestamp,
 })
 export type TimerEvent = typeof TimerEvent.Type
 

@@ -1,25 +1,26 @@
 import { Duration } from 'effect'
-import type { Timer, TimerEvent } from './schemas'
+import { type Timer, type TimerEvent, Timestamp } from './schemas'
 
 export interface TimerState {
 	state: 'running' | 'paused' | 'completed'
 	remaining: number
 	elapsed: number
-	currentPhase: 'work' | 'break'
 }
 
-export function computeTimerState(
-	timer: Timer,
-	currentPhase: 'work' | 'break',
-	phaseDuration: Duration.Duration,
-	now: number = Date.now(),
-): TimerState {
+export function computeTimerState({
+	timer,
+	phaseDuration,
+	now = Date.now(),
+}: {
+	timer: Timer
+	phaseDuration: Duration.Duration
+	now?: number
+}): TimerState {
 	if (timer.events.length === 0) {
 		return {
 			state: 'paused',
 			remaining: Duration.toMillis(phaseDuration),
 			elapsed: 0,
-			currentPhase,
 		}
 	}
 
@@ -50,7 +51,6 @@ export function computeTimerState(
 					state: 'completed',
 					remaining: 0,
 					elapsed: Duration.toMillis(phaseDuration),
-					currentPhase,
 				}
 		}
 	}
@@ -68,13 +68,12 @@ export function computeTimerState(
 		state: remaining > 0 ? (isRunning ? 'running' : 'paused') : 'completed',
 		remaining,
 		elapsed,
-		currentPhase,
 	}
 }
 
 export function createTimerEvent(type: TimerEvent['type']): TimerEvent {
 	return {
 		type,
-		timestamp: Date.now(),
+		timestamp: Timestamp.make(Date.now()),
 	}
 }

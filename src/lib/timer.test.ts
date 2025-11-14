@@ -1,10 +1,10 @@
 import { Duration } from 'effect'
 import { describe, expect, it } from 'vitest'
-import type { Timer, TimerEvent } from './schemas'
+import { type Timer, type TimerEvent, Timestamp } from './schemas'
 import { computeTimerState } from './timer'
 
 describe('Timer State Computation', () => {
-	const baseTime = 1000000 // Base timestamp for consistent testing
+	const baseTime = Timestamp.make(1000000) // Base timestamp for consistent testing
 	const workDuration = Duration.minutes(40)
 	const breakDuration = Duration.minutes(5)
 
@@ -20,30 +20,32 @@ describe('Timer State Computation', () => {
 		type: TimerEvent['type'],
 		timestamp: number = baseTime,
 	): TimerEvent {
-		return { type, timestamp }
+		return { type, timestamp: Timestamp.make(timestamp) }
 	}
 
 	describe('Initial State', () => {
 		it('should return paused state with full duration when no events exist', () => {
 			const timer = createTimer([])
-			const state = computeTimerState(timer, 'work', workDuration, baseTime)
+			const state = computeTimerState({
+				timer,
+				phaseDuration: workDuration,
+				now: baseTime,
+			})
 
 			expect(state.state).toBe('paused')
 			expect(state.remaining).toBe(Duration.toMillis(workDuration))
 			expect(state.elapsed).toBe(0)
-			expect(state.currentPhase).toBe('work')
 		})
 	})
 
 	describe('Started Timer', () => {
 		it('should compute running state after start event', () => {
 			const timer = createTimer([createEvent('started', baseTime)])
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 1000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 1000,
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(1000)
@@ -53,12 +55,11 @@ describe('Timer State Computation', () => {
 		it('should handle work phase duration correctly', () => {
 			const timer = createTimer([createEvent('started', baseTime)])
 			const halfWork = Duration.toMillis(workDuration) / 2
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + halfWork,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + halfWork,
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(halfWork)
@@ -68,12 +69,11 @@ describe('Timer State Computation', () => {
 		it('should handle break phase duration correctly', () => {
 			const timer = createTimer([createEvent('started', baseTime)])
 			const halfBreak = Duration.toMillis(breakDuration) / 2
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'break',
-				breakDuration,
-				baseTime + halfBreak,
-			)
+				phaseDuration: breakDuration,
+				now: baseTime + halfBreak,
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(halfBreak)
@@ -88,12 +88,11 @@ describe('Timer State Computation', () => {
 				createEvent('paused', baseTime + 5000),
 			]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 10000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 10000,
+			})
 
 			expect(state.state).toBe('paused')
 			expect(state.elapsed).toBe(5000)
@@ -106,18 +105,16 @@ describe('Timer State Computation', () => {
 				createEvent('paused', baseTime + 5000),
 			]
 			const timer = createTimer(events)
-			const state1 = computeTimerState(
+			const state1 = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 10000,
-			)
-			const state2 = computeTimerState(
+				phaseDuration: workDuration,
+				now: baseTime + 10000,
+			})
+			const state2 = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 20000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 20000,
+			})
 
 			expect(state1.elapsed).toBe(5000)
 			expect(state2.elapsed).toBe(5000) // Should be the same
@@ -132,12 +129,11 @@ describe('Timer State Computation', () => {
 				createEvent('resumed', baseTime + 10000),
 			]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 15000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 15000,
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(10000) // 5s before pause + 5s after resume
@@ -153,12 +149,11 @@ describe('Timer State Computation', () => {
 				createEvent('resumed', baseTime + 20000),
 			]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 25000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 25000,
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(15000) // 5s + 5s + 5s = 15s
@@ -171,12 +166,11 @@ describe('Timer State Computation', () => {
 			const events = [createEvent('started', baseTime)]
 			const timer = createTimer(events)
 			const fullDuration = Duration.toMillis(workDuration)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + fullDuration + 1000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + fullDuration + 1000,
+			})
 
 			expect(state.state).toBe('completed')
 			expect(state.remaining).toBe(0)
@@ -187,12 +181,11 @@ describe('Timer State Computation', () => {
 			const events = [createEvent('started', baseTime)]
 			const timer = createTimer(events)
 			const fullDuration = Duration.toMillis(workDuration)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + fullDuration + 5000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + fullDuration + 5000,
+			})
 
 			expect(state.elapsed).toBe(fullDuration) // Should not exceed phase duration
 		})
@@ -202,12 +195,11 @@ describe('Timer State Computation', () => {
 		it('should return completed state immediately on skip', () => {
 			const events = [createEvent('skipped', baseTime)]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 1000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 1000,
+			})
 
 			expect(state.state).toBe('completed')
 			expect(state.remaining).toBe(0)
@@ -222,12 +214,11 @@ describe('Timer State Computation', () => {
 				createEvent('skipped', baseTime + 15000),
 			]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 20000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 20000,
+			})
 
 			expect(state.state).toBe('completed')
 			expect(state.elapsed).toBe(Duration.toMillis(workDuration))
@@ -238,12 +229,11 @@ describe('Timer State Computation', () => {
 		it('should handle pause without start', () => {
 			const events = [createEvent('paused', baseTime)]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 1000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 1000,
+			})
 
 			expect(state.state).toBe('paused')
 			expect(state.elapsed).toBe(0)
@@ -252,12 +242,11 @@ describe('Timer State Computation', () => {
 		it('should handle resume without start', () => {
 			const events = [createEvent('resumed', baseTime)]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 1000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 1000,
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(1000)
@@ -270,12 +259,11 @@ describe('Timer State Computation', () => {
 				createEvent('paused', baseTime + 10000), // Extra pause
 			]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + 15000,
-			)
+				phaseDuration: workDuration,
+				now: baseTime + 15000,
+			})
 
 			expect(state.state).toBe('paused')
 			expect(state.elapsed).toBe(5000)
@@ -284,12 +272,11 @@ describe('Timer State Computation', () => {
 		it('should handle zero duration', () => {
 			const timer = createTimer([createEvent('started', baseTime)])
 			const zeroDuration = Duration.millis(0)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				zeroDuration,
-				baseTime + 1000,
-			)
+				phaseDuration: zeroDuration,
+				now: baseTime + 1000,
+			})
 
 			expect(state.state).toBe('completed')
 			expect(state.remaining).toBe(0)
@@ -320,12 +307,11 @@ describe('Timer State Computation', () => {
 				), // Resume after 5 min break
 			]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				workDuration,
-				baseTime + Duration.toMillis(Duration.minutes(35)),
-			)
+				phaseDuration: workDuration,
+				now: baseTime + Duration.toMillis(Duration.minutes(35)),
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(Duration.toMillis(Duration.minutes(25))) // 10 + 10 + 5 = 25 min of actual work
@@ -335,12 +321,11 @@ describe('Timer State Computation', () => {
 		it('should handle short break cycle', () => {
 			const events = [createEvent('started', baseTime)]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'break',
-				breakDuration,
-				baseTime + Duration.toMillis(Duration.minutes(3)),
-			)
+				phaseDuration: breakDuration,
+				now: baseTime + Duration.toMillis(Duration.minutes(3)),
+			})
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(Duration.toMillis(Duration.minutes(3)))
@@ -356,12 +341,11 @@ describe('Timer State Computation', () => {
 				createEvent('resumed', baseTime + 45000), // Resume at 45 seconds
 			]
 			const timer = createTimer(events)
-			const state = computeTimerState(
+			const state = computeTimerState({
 				timer,
-				'work',
-				microDuration,
-				baseTime + 55000,
-			) // Check at 55 seconds
+				phaseDuration: microDuration,
+				now: baseTime + 55000,
+			}) // Check at 55 seconds
 
 			expect(state.state).toBe('running')
 			expect(state.elapsed).toBe(40000) // 30s + 10s = 40s
