@@ -5,6 +5,7 @@ export const confectSchema = defineSchema({
 	// Rooms with permanent shareable spaces
 	rooms: defineTable(Room)
 		.index('by_createdBy', ['createdBy'])
+		.index('by_handle', ['handle'])
 		.index('by_visibility', ['visibility']),
 
 	// User sessions (personal to each user)
@@ -17,7 +18,7 @@ export const confectSchema = defineSchema({
 	// Work/break cycles within sessions
 	cycles: defineTable(Cycle).index('by_sessionId', ['sessionId']),
 
-	userProfiles: defineTable(UserProfile),
+	userProfiles: defineTable(UserProfile).index('by_userId', ['userId']),
 })
 
 export default confectSchema.convexSchemaDefinition

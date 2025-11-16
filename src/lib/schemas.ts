@@ -113,3 +113,8 @@ export const UpdateRoomArgs = Schema.Struct({
 	...Room.omit('createdBy', 'handle').fields,
 	id: Id.Id('rooms'),
 })
+export const GetRoomByHandleArgs = Room.pick('handle')
+export const GetRoomByHandleResult = Schema.Option(Room)
+
+export const GetCurrentUserProfileArgs = Schema.Struct({})
+export const GetCurrentUserProfileReturn = Schema.Option(UserProfile)

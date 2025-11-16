@@ -1,14 +1,16 @@
-import { Effect, Schema } from 'effect'
+import { Effect, Option, Schema } from 'effect'
 import { DEFAULT_BREAK_DURATION, DEFAULT_CYCLE_DURATION } from '@/lib/constants'
 import { createRoomHandle } from '@/lib/handles'
 import {
 	CreateRoomArgs,
 	CreateRoomResult,
+	GetRoomByHandleArgs,
+	GetRoomByHandleResult,
 	Timer,
 	UpdateRoomArgs,
 	UserId,
 } from '@/lib/schemas'
-import { ConfectMutationCtx, mutation } from './confect'
+import { ConfectMutationCtx, ConfectQueryCtx, mutation, query } from './confect'
 
 export const create = mutation({
 	args: CreateRoomArgs,
@@ -47,4 +49,22 @@ export const update = mutation({
 
 			return null
 		}),
+})
+
+export const getByHandle = query({
+	args: GetRoomByHandleArgs,
+	returns: GetRoomByHandleResult,
+	handler: ({ handle }) =>
+		Effect.gen(function* () {
+			const { db, auth } = yield* ConfectQueryCtx
+			const room = yield* db
+				.query('rooms')
+				.withIndex('by_handle', (q) => q.eq('handle', handle))
+				.unique()
+
+			const identity = yield* auth.getUserIdentity()
+			console.log(identity)
+
+			return room
+		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none()))),
 })
