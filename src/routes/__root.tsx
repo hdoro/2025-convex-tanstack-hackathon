@@ -18,6 +18,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getCookie, getRequest } from '@tanstack/react-start/server'
 import type { ConvexReactClient } from 'convex/react'
 import type { PropsWithChildren } from 'react'
+import NotFoundScreen from '@/components/not-found-screen'
 import { SettingsMenu } from '@/components/settings-menu'
 import { getRandomItemFromArray } from '@/lib/arrays'
 import { authClient } from '@/lib/auth-client'
@@ -71,7 +72,7 @@ export const Route = createRootRouteWithContext<{
 				content: 'width=device-width, initial-scale=1',
 			},
 			{
-				title: 'TanStack Start Starter',
+				title: 'Fokua',
 			},
 		],
 		links: [
@@ -97,6 +98,7 @@ export const Route = createRootRouteWithContext<{
 		}
 		return { userId, token, theme, locale }
 	},
+	notFoundComponent: NotFoundScreen,
 
 	component: RootComponent,
 })
