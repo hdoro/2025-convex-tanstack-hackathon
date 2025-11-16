@@ -5,5 +5,10 @@ import { ENV } from './constants.client'
 
 export const authClient = createAuthClient({
 	baseURL: ENV.CONVEX_SITE_URL,
-	plugins: [convexClient(), magicLinkClient(), anonymousClient()],
+	plugins: [
+		convexClient(),
+		magicLinkClient(),
+		anonymousClient(),
+		magicLinkClient(),
+	],
 })

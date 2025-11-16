@@ -1,7 +1,8 @@
 import { httpRouter } from 'convex/server'
 import { DB_TRUSTED_ORIGINS } from '@/lib/constants.db'
-import { createAuth } from './auth'
-import { authComponent } from './auth/client'
+import { httpAction } from './_generated/server'
+import { authComponent, createAuth } from './auth'
+import { resend } from './resend'
 
 const http = httpRouter()
 
@@ -11,6 +12,14 @@ authComponent.registerRoutes(http, createAuth, {
 		allowedHeaders: ['Content-Type', 'Authorization'],
 		exposedHeaders: ['Set-Cookie'],
 	},
+})
+
+http.route({
+	path: '/resend-webhook',
+	method: 'POST',
+	handler: httpAction(async (ctx, req) => {
+		return await resend.handleResendEventWebhook(ctx, req)
+	}),
 })
 
 export default http
