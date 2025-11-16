@@ -6,7 +6,7 @@ export function parseCurrentConvexEnvironment() {
 	return 'production'
 }
 
-const WEB_URLS = {
+export const WEB_URLS = {
 	production: process.env.VITE_WEB_URL_PROD as string,
 	development: process.env.VITE_WEB_URL_DEV as string,
 	local: process.env.VITE_WEB_URL_LOCAL as string,

@@ -8,12 +8,14 @@ import { routeTree } from './routeTree.gen'
 // Create a new router instance
 export const getRouter = () => {
 	const convex = new ConvexReactClient(ENV.CONVEX_URL, {
+		expectAuth: true,
 		unsavedChangesWarning: false,
 	})
 	const convexQueryClient = new ConvexQueryClient(convex)
 
 	const router = createRouter({
 		routeTree,
+		defaultPreload: 'intent',
 		scrollRestoration: true,
 		defaultPreloadStaleTime: 0,
 		context: { convexClient: convex, convexQueryClient },

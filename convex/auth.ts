@@ -75,8 +75,7 @@ export const createAuth = (
 			},
 		},
 		plugins: [
-			convex(),
-			anonymous(),
+			anonymous({ disableDeleteAnonymousUser: true }),
 			magicLink({
 				sendMagicLink: async (data) => {
 					console.log('SEND MAGIC LINK', data)
@@ -91,6 +90,7 @@ export const createAuth = (
 					})
 				},
 			}),
+			convex(),
 		],
 	})
 }

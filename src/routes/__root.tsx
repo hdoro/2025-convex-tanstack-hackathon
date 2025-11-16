@@ -80,6 +80,7 @@ export const Route = createRootRouteWithContext<{
 				rel: 'stylesheet',
 				href: appCss,
 			},
+			{ rel: 'icon', href: '/favicon.ico' },
 		],
 	}),
 
@@ -91,11 +92,13 @@ export const Route = createRootRouteWithContext<{
 			fetchTheme(),
 			fetchLocale(),
 		] as const)
+
 		// During SSR only (the only time serverHttpClient exists),
 		// set the auth token to make HTTP queries with.
 		if (token) {
 			ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
 		}
+
 		return { userId, token, theme, locale }
 	},
 	notFoundComponent: NotFoundScreen,
@@ -107,7 +110,7 @@ function RootComponent() {
 	const context = useRouteContext({ from: Route.id })
 	return (
 		<ConvexBetterAuthProvider
-			client={context.convexClient}
+			client={context.convexQueryClient.convexClient}
 			authClient={authClient}
 		>
 			<Providers convexClient={context.convexClient} locale={context.locale}>

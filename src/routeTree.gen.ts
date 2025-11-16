@@ -9,54 +9,131 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignedOutRouteImport } from './routes/_signed-out'
+import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignedOutAuthRouteImport } from './routes/_signed-out/auth'
+import { Route as AuthedCreateRoomRouteImport } from './routes/_authed/create-room'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthedRHandleRouteImport } from './routes/_authed/r.$handle'
 
+const SignedOutRoute = SignedOutRouteImport.update({
+  id: '/_signed-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SignedOutAuthRoute = SignedOutAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => SignedOutRoute,
+} as any)
+const AuthedCreateRoomRoute = AuthedCreateRoomRouteImport.update({
+  id: '/create-room',
+  path: '/create-room',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedRHandleRoute = AuthedRHandleRouteImport.update({
+  id: '/r/$handle',
+  path: '/r/$handle',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/create-room': typeof AuthedCreateRoomRoute
+  '/auth': typeof SignedOutAuthRoute
+  '/r/$handle': typeof AuthedRHandleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/create-room': typeof AuthedCreateRoomRoute
+  '/auth': typeof SignedOutAuthRoute
+  '/r/$handle': typeof AuthedRHandleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authed': typeof AuthedRouteWithChildren
+  '/_signed-out': typeof SignedOutRouteWithChildren
+  '/_authed/create-room': typeof AuthedCreateRoomRoute
+  '/_signed-out/auth': typeof SignedOutAuthRoute
+  '/_authed/r/$handle': typeof AuthedRHandleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$'
+  fullPaths: '/' | '/create-room' | '/auth' | '/r/$handle' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/auth/$'
+  to: '/' | '/create-room' | '/auth' | '/r/$handle' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/_signed-out'
+    | '/_authed/create-room'
+    | '/_signed-out/auth'
+    | '/_authed/r/$handle'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
+  SignedOutRoute: typeof SignedOutRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_signed-out': {
+      id: '/_signed-out'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof SignedOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_signed-out/auth': {
+      id: '/_signed-out/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof SignedOutAuthRouteImport
+      parentRoute: typeof SignedOutRoute
+    }
+    '/_authed/create-room': {
+      id: '/_authed/create-room'
+      path: '/create-room'
+      fullPath: '/create-room'
+      preLoaderRoute: typeof AuthedCreateRoomRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -65,11 +142,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/r/$handle': {
+      id: '/_authed/r/$handle'
+      path: '/r/$handle'
+      fullPath: '/r/$handle'
+      preLoaderRoute: typeof AuthedRHandleRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedCreateRoomRoute: typeof AuthedCreateRoomRoute
+  AuthedRHandleRoute: typeof AuthedRHandleRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedCreateRoomRoute: AuthedCreateRoomRoute,
+  AuthedRHandleRoute: AuthedRHandleRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
+interface SignedOutRouteChildren {
+  SignedOutAuthRoute: typeof SignedOutAuthRoute
+}
+
+const SignedOutRouteChildren: SignedOutRouteChildren = {
+  SignedOutAuthRoute: SignedOutAuthRoute,
+}
+
+const SignedOutRouteWithChildren = SignedOutRoute._addFileChildren(
+  SignedOutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthedRoute: AuthedRouteWithChildren,
+  SignedOutRoute: SignedOutRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
