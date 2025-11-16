@@ -16,7 +16,6 @@ export const getCurrentProfile = query({
 			const { db, auth } = yield* ConfectQueryCtx
 
 			const identityResult = yield* auth.getUserIdentity()
-			console.log({ identity: identityResult })
 
 			if (Option.isNone(identityResult)) return Option.none()
 
