@@ -1,6 +1,7 @@
 import { Effect, Either } from 'effect'
 import { ForbiddenError } from '../db/db-errors'
-import { CurrentSession, type UserSession } from './session'
+import type { UserSession } from '../schemas'
+import { CurrentSession } from './current-session'
 
 /**
  * Represents an access policy that can be evaluated against the current user.

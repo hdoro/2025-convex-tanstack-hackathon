@@ -1,33 +1,13 @@
-import { Effect, Option } from 'effect'
+import { CurrentSession } from '@/lib/authorization/current-session'
+import { dbEffect } from '@/lib/db/db-effect'
 import {
 	GetCurrentUserProfileArgs,
 	GetCurrentUserProfileReturn,
-	type UserId,
 } from '@/lib/schemas'
-import { ConfectQueryCtx, query } from './confect'
-
-const TOKEN_SUB_CLAIM_DIVIDER = '|'
+import { query } from './confect'
 
 export const getCurrentProfile = query({
 	args: GetCurrentUserProfileArgs,
 	returns: GetCurrentUserProfileReturn,
-	handler: () =>
-		Effect.gen(function* () {
-			const { db, auth } = yield* ConfectQueryCtx
-
-			const identityResult = yield* auth.getUserIdentity()
-
-			if (Option.isNone(identityResult)) return Option.none()
-
-			const [userId] = identityResult.value.subject.split(
-				TOKEN_SUB_CLAIM_DIVIDER,
-			) as [UserId]
-
-			const userProfile = yield* db
-				.query('userProfiles')
-				.withIndex('by_userId', (q) => q.eq('userId', userId))
-				.unique()
-
-			return userProfile
-		}),
+	handler: () => dbEffect(CurrentSession),
 })

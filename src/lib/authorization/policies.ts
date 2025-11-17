@@ -1,11 +1,11 @@
 import { Effect } from 'effect'
-import type { Room } from '../schemas'
-import { allow, deny, orFail, policy } from './policy.internal'
 import type {
 	ActiveUserSession,
 	InactiveUserSession,
+	Room,
 	UserSession,
-} from './session'
+} from '../schemas'
+import { allow, deny, orFail, policy } from './policy.internal'
 
 export * from './policy.internal'
 

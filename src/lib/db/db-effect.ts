@@ -1,7 +1,7 @@
 import { ConvexError } from 'convex/values'
 import { Effect, Layer, Logger, LogLevel } from 'effect'
+import { CurrentSession } from '../authorization/current-session'
 import { fetchCurrentSession } from '../authorization/fetch-current-session'
-import { CurrentSession } from '../authorization/session'
 import { parseCurrentConvexEnvironment } from '../constants.db'
 import type { ForbiddenError, NotFoundError } from './db-errors'
 

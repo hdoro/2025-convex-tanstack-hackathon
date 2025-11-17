@@ -103,7 +103,33 @@ export const UserProfile = Schema.Struct({
 export type UserProfile = typeof UserProfile.Type
 
 // ===============
-// ROOMS ENDPOINTS
+// SESSION
+// ===============
+
+export const ActiveUserSession = Schema.Struct({
+	userId: UserId,
+	status: Schema.Literal('active'),
+	userProfile: UserProfile,
+	locale: SupportedLocale,
+})
+export type ActiveUserSession = typeof ActiveUserSession.Type
+
+export const InactiveUserSession = Schema.Struct({
+	userId: UserId,
+	status: Schema.Literal('inactive'),
+	locale: SupportedLocale,
+})
+export type InactiveUserSession = typeof InactiveUserSession.Type
+
+export const UserSession = Schema.Union(
+	ActiveUserSession,
+	InactiveUserSession,
+	Schema.Null,
+)
+export type UserSession = typeof UserSession.Type
+
+// ===============
+// ENDPOINTS
 // ===============
 
 export const CreateRoomArgs = Schema.Struct({})
@@ -118,4 +144,4 @@ export const GetRoomByHandleArgs = Room.pick('handle')
 export const GetRoomByHandleResult = Schema.Option(Room)
 
 export const GetCurrentUserProfileArgs = Schema.Struct({})
-export const GetCurrentUserProfileReturn = Schema.Option(UserProfile)
+export const GetCurrentUserProfileReturn = UserSession

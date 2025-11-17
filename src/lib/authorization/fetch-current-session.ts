@@ -1,7 +1,7 @@
 import { ConfectMutationCtx, ConfectQueryCtx } from '@db/confect'
 import { Effect, Option } from 'effect'
+import type { ActiveUserSession, InactiveUserSession } from '../schemas'
 import { SupportedLocale, type UserId } from '../schemas'
-import type { ActiveUserSession, InactiveUserSession } from './session'
 
 const TOKEN_SUB_CLAIM_DIVIDER = '|'
 
