@@ -1,16 +1,13 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeTimerAnimation } from '@/components/home-timer-animation'
 import { Button } from '@/components/ui/button'
+import { useLingui } from '@/hooks/use-lingui-stub'
 
 export const Route = createFileRoute('/')({ component: App })
 
 function App() {
-	const navigate = useNavigate()
-	async function logIn() {
-		console.log('HERE')
-		// const user = await authClient.signIn.anonymous()
-		navigate({ to: '/create-room' })
-	}
+	const { t } = useLingui()
+
 	return (
 		<main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background">
 			<div className="absolute inset-0 bg-background" />
@@ -21,22 +18,24 @@ function App() {
 					<div className="space-y-8 text-center lg:text-left">
 						<div className="space-y-4">
 							<h1 className="text-balance font-bold text-4xl text-muted-foreground tracking-tight md:text-5xl lg:text-7xl">
-								Go beyond solo,
+								{t`Go beyond solo,`}
 								<br />
 								<span className="text-foreground">flow together</span>
 							</h1>
 							<p className="max-w-2xl text-pretty text-lg text-muted-foreground leading-relaxed md:text-xl">
-								Work in focused cycles with others and keep each other on track.
+								{t`Work in focused cycles with others and keep each other on track.
 								Clarify your goals with simple questions. Stay accountable.
-								Reach flow state.
+								Reach flow state.`}
 							</p>
 						</div>
 
 						<div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
-							<Button size="lg">Start Session</Button>
-							<Button size="lg" variant="outline">
-								Join Session
+							<Button size="lg" asChild>
+								<Link to="/create-room">{t`Start Session`}</Link>
 							</Button>
+							{/*<Button size="lg" variant="outline">
+								{t`Join Session`}
+							</Button>*/}
 						</div>
 					</div>
 

@@ -1,4 +1,8 @@
-import { Check, Palette, Search } from 'lucide-react'
+import {
+	CheckIcon,
+	MagnifyingGlassIcon,
+	PaletteIcon,
+} from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,14 +16,17 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useColorMode } from '@/hooks/use-color-mode'
 import { useLingui } from '@/hooks/use-lingui-stub'
+import { shuffleArray } from '@/lib/arrays'
 import { themePresetToCssCustomProperties } from '@/lib/theme-helpers'
 import { type Theme, themes } from '@/lib/themes'
 import { useTheme } from '@/providers/theme-provider'
 
-const THEMES_ARRAY = Object.entries(themes).map(([theme, config]) => ({
-	...config,
-	id: theme as Theme,
-}))
+const THEMES_ARRAY = shuffleArray(
+	Object.entries(themes).map(([theme, config]) => ({
+		...config,
+		id: theme as Theme,
+	})),
+)
 
 export function ThemeSelector() {
 	const { t } = useLingui()
@@ -38,10 +45,11 @@ export function ThemeSelector() {
 			<Button
 				onClick={() => setOpen(true)}
 				size="lg"
-				className="fixed right-6 bottom-6 h-14 w-14 rounded-full shadow-lg"
+				className="fixed right-6 bottom-6"
 				aria-label="Open theme selector"
 			>
-				<Palette className="h-6 w-6" />
+				<PaletteIcon />
+				{t`Theme`}
 			</Button>
 
 			{/* Theme Modal */}
@@ -57,7 +65,7 @@ export function ThemeSelector() {
 					{/* Search */}
 					<div className="px-6 pb-4">
 						<div className="relative">
-							<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+							<MagnifyingGlassIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 							<Input
 								placeholder="Search themes..."
 								value={search}
@@ -74,7 +82,7 @@ export function ThemeSelector() {
 								<button
 									key={theme.id}
 									onClick={() => setTheme(theme.id)}
-									className="group relative overflow-hidden rounded-lg border-2 text-left transition-all hover:border-primary hover:shadow-md"
+									className="group relative overflow-hidden rounded-lg border-2 text-left ring-accent-foreground ring-offset-1 transition-all hover:border-primary hover:shadow-md focus-visible:ring-4"
 									style={{
 										...themePresetToCssCustomProperties(theme.id, colorMode),
 										borderColor:
@@ -103,7 +111,7 @@ export function ThemeSelector() {
 												</p>*/}
 											</div>
 											{selectedTheme === theme.id && (
-												<Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+												<CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
 											)}
 										</div>
 									</div>

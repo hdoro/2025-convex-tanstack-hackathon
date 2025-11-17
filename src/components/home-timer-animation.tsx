@@ -1,40 +1,57 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLingui } from '@/hooks/use-lingui-stub'
+
+const avatars = [
+	{ color: 'bg-primary', name: 'CO' },
+	{ color: 'bg-secondary ', name: 'NV' },
+	{ color: 'bg-accent', name: 'EX' },
+	{ color: 'bg-foreground text-background', name: 'TS' },
+]
+
+type TimerState = {
+	mode: 'focus' | 'break'
+	timeRemaining: number
+}
+
+const FOCUS_DURATION = 45
+const BREAK_DURATION = 7.5
 
 export function HomeTimerAnimation() {
-	const [progress, setProgress] = useState(0)
-	const [time, setTime] = useState(25 * 60) // 25 minutes in seconds
+	const [timerState, setTimerState] = useState<TimerState>({
+		mode: 'focus',
+		timeRemaining: FOCUS_DURATION,
+	})
+	const { t } = useLingui()
 
-	const avatars = [
-		{ color: 'bg-blue-500', name: 'JS' },
-		{ color: 'bg-purple-500', name: 'AM' },
-		{ color: 'bg-pink-500', name: 'SK' },
-		{ color: 'bg-indigo-500', name: 'TR' },
-	]
+	const progress =
+		(((timerState.mode === 'focus' ? FOCUS_DURATION : BREAK_DURATION) -
+			timerState.timeRemaining) /
+			(timerState.mode === 'focus' ? FOCUS_DURATION : BREAK_DURATION)) *
+		100
 
 	useEffect(() => {
-		// Animate progress
-		const progressInterval = setInterval(() => {
-			setProgress((prev) => (prev + 0.2) % 100)
-		}, 50)
-
 		// Countdown timer
 		const timerInterval = setInterval(() => {
-			setTime((prev) => {
-				if (prev <= 0) return 25 * 60
-				return prev - 1
+			setTimerState((prev) => {
+				if (prev.timeRemaining <= 0) {
+					// Switch between focus and break
+					const newMode = prev.mode === 'focus' ? 'break' : 'focus'
+					const newTime = newMode === 'focus' ? FOCUS_DURATION : BREAK_DURATION
+					return { mode: newMode, timeRemaining: newTime }
+				}
+				return { ...prev, timeRemaining: prev.timeRemaining - 1 }
 			})
 		}, 1000)
 
 		return () => {
-			clearInterval(progressInterval)
 			clearInterval(timerInterval)
 		}
 	}, [])
 
-	const minutes = Math.floor(time / 60)
-	const seconds = time % 60
+	const minutes = Math.floor(timerState.timeRemaining)
+	const seconds = Math.floor((timerState.timeRemaining / 60) % 60)
 
 	return (
 		<div className="relative flex w-full max-w-md flex-col items-center gap-2">
@@ -63,18 +80,24 @@ export function HomeTimerAnimation() {
 						strokeLinecap="round"
 						strokeDasharray={`${2 * Math.PI * 85}`}
 						strokeDashoffset={`${2 * Math.PI * 85 * (1 - progress / 100)}`}
-						className="text-primary transition-all duration-300"
+						className="text-primary transition-all duration-1000 ease-linear"
 					/>
 				</svg>
 
 				<div className="absolute inset-0 flex flex-col items-center justify-center">
-					<div className="flex h-48 w-48 flex-col items-center justify-center rounded-full border border-border bg-card shadow-lg">
+					<div className="flex h-48 w-48 flex-col items-center justify-center rounded-full border border-border bg-card">
 						<div className="font-bold font-mono text-5xl text-foreground tabular-nums">
-							{String(minutes).padStart(2, '0')}:
-							{String(seconds).padStart(2, '0')}
+							{minutes === 0 ? (
+								'00:00'
+							) : (
+								<>
+									{String(minutes).padStart(2, '0')}:
+									{String(seconds).padStart(2, '0')}
+								</>
+							)}
 						</div>
 						<div className="mt-1 font-medium text-muted-foreground text-sm">
-							Focus Cycle
+							{timerState.mode === 'focus' ? t`Focus Cycle` : t`Break Time`}
 						</div>
 					</div>
 				</div>
@@ -91,7 +114,7 @@ export function HomeTimerAnimation() {
 						}}
 					>
 						<div
-							className={`h-14 w-14 select-none rounded-full ${avatar.color} flex items-center justify-center border-4 border-background font-semibold text-base text-white shadow-lg`}
+							className={`h-14 w-14 select-none rounded-full ${avatar.color} flex items-center justify-center border-4 border-background font-semibold text-base`}
 						>
 							{avatar.name}
 						</div>

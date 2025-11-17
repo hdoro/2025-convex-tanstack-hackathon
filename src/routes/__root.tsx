@@ -114,7 +114,7 @@ function RootDocument(props: PropsWithChildren<{ theme: Theme }>) {
 					{props.children}
 					<TanStackDevtools
 						config={{
-							position: 'bottom-left',
+							position: 'top-right',
 						}}
 						plugins={[
 							{
