@@ -1,4 +1,3 @@
-import { lingui } from '@lingui/vite-plugin'
 import netlify from '@netlify/vite-plugin-tanstack-start'
 import tailwindcss from '@tailwindcss/vite'
 import { devtools } from '@tanstack/devtools-vite'
@@ -17,13 +16,9 @@ const config = defineConfig({
 		}),
 		tailwindcss(),
 		tanstackStart(),
-		lingui(),
 		viteReact({
 			babel: {
-				plugins: [
-					'@lingui/babel-plugin-lingui-macro',
-					'babel-plugin-react-compiler',
-				],
+				plugins: ['babel-plugin-react-compiler'],
 			},
 		}),
 	],

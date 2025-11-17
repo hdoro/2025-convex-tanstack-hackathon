@@ -1,4 +1,4 @@
-import { type MacroMessageDescriptor, msg } from '@lingui/core/macro'
+import { type MacroMessageDescriptor, msg } from '@/hooks/use-lingui-stub'
 import type {
 	CycleDebrief,
 	CycleIntention,

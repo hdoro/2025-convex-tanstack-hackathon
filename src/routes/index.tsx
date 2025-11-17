@@ -1,10 +1,19 @@
-import { useLingui } from '@lingui/react/macro'
-import { createFileRoute } from '@tanstack/react-router'
-import { CYCLE_DEBRIEF_LABELS } from '@/lib/labels'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/')({ component: App })
 
 function App() {
-	const { t } = useLingui()
-	return <div>{t(CYCLE_DEBRIEF_LABELS.completedTarget)}</div>
+	const navigate = useNavigate()
+	async function logIn() {
+		console.log('HERE')
+		// const user = await authClient.signIn.anonymous()
+		navigate({ to: '/create-room' })
+	}
+	return (
+		<div>
+			@TODO
+			<Button onClick={logIn}>Log in</Button>
+		</div>
+	)
 }

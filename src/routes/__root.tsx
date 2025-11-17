@@ -1,10 +1,8 @@
-import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react'
 import {
 	fetchSession,
 	getCookieName,
 } from '@convex-dev/better-auth/react-start'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
-import { useLingui } from '@lingui/react'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import {
 	createRootRouteWithContext,
@@ -21,12 +19,7 @@ import type { PropsWithChildren } from 'react'
 import NotFoundScreen from '@/components/not-found-screen'
 import { SettingsMenu } from '@/components/settings-menu'
 import { getRandomItemFromArray } from '@/lib/arrays'
-import { authClient } from '@/lib/auth-client'
 import { THEME_COOKIE_KEY } from '@/lib/constants'
-import {
-	getLocaleFromRequest,
-	setupLocaleFromRequest,
-} from '@/lib/i18n/i18n.server'
 import { isValidTheme, type Theme, themes } from '@/lib/themes'
 import Providers from '@/providers/providers'
 import ThemeProvider from '@/providers/theme-provider'
@@ -43,11 +36,6 @@ const fetchAuth = createServerFn({ method: 'GET' }).handler(async () => {
 		userId: session?.user.id,
 		token,
 	}
-})
-
-const fetchLocale = createServerFn({ method: 'GET' }).handler(async () => {
-	await setupLocaleFromRequest()
-	return getLocaleFromRequest()
 })
 
 const fetchTheme = createServerFn({ method: 'GET' }).handler(async () => {
@@ -87,10 +75,9 @@ export const Route = createRootRouteWithContext<{
 	beforeLoad: async (ctx) => {
 		// all queries, mutations and action made with TanStack Query will be
 		// authenticated by an identity token.
-		const [{ userId, token }, theme, locale] = await Promise.all([
+		const [{ userId, token }, theme] = await Promise.all([
 			fetchAuth(),
 			fetchTheme(),
-			fetchLocale(),
 		] as const)
 
 		// During SSR only (the only time serverHttpClient exists),
@@ -99,7 +86,7 @@ export const Route = createRootRouteWithContext<{
 			ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
 		}
 
-		return { userId, token, theme, locale }
+		return { userId, token, theme }
 	},
 	notFoundComponent: NotFoundScreen,
 
@@ -109,29 +96,22 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
 	const context = useRouteContext({ from: Route.id })
 	return (
-		<ConvexBetterAuthProvider
-			client={context.convexQueryClient.convexClient}
-			authClient={authClient}
-		>
-			<Providers convexClient={context.convexClient} locale={context.locale}>
-				<RootDocument theme={context.theme}>
-					<Outlet />
-				</RootDocument>
-			</Providers>
-		</ConvexBetterAuthProvider>
+		<Providers convexClient={context.convexQueryClient.convexClient}>
+			<RootDocument theme={context.theme}>
+				<Outlet />
+			</RootDocument>
+		</Providers>
 	)
 }
 
 function RootDocument(props: PropsWithChildren<{ theme: Theme }>) {
-	const { i18n } = useLingui()
 	return (
-		<html lang={i18n.locale}>
+		<html lang={'en'}>
 			<head>
 				<HeadContent />
 			</head>
 			<body>
 				<ThemeProvider theme={props.theme}>
-					<h1>Here</h1>
 					<SettingsMenu />
 					{props.children}
 					<TanStackDevtools
