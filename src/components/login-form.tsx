@@ -1,0 +1,45 @@
+import { GoogleLogoIcon } from '@phosphor-icons/react'
+import { Button } from '@/components/ui/button'
+import { useLingui } from '@/hooks/use-lingui-stub'
+import { cn } from '@/lib/utils'
+
+export function LoginForm({
+	className,
+	...props
+}: React.ComponentProps<'div'>) {
+	const { t } = useLingui()
+	return (
+		<div
+			className={cn(
+				'mx-auto grid max-w-2xl gap-4 gap-6 py-4 sm:grid-cols-2',
+				className,
+			)}
+			{...props}
+		>
+			<Button variant="outline" type="button">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="1em"
+					height="1em"
+					viewBox="0 0 24 24"
+				>
+					<g
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+					>
+						<path d="M7 15a3 3 0 1 0 0 6a3 3 0 0 0 0-6m10 0a3 3 0 1 0 0 6a3 3 0 0 0 0-6m-3 2h-4m12-4c-2.457-1.228-6.027-2-10-2s-7.543.772-10 2" />
+						<path d="m19 11.5l-1.058-6.788c-.215-1.384-1.719-2.134-2.933-1.463l-.615.34a4.94 4.94 0 0 1-4.788 0l-.615-.34c-1.214-.671-2.718.08-2.933 1.463L5 11.5" />
+					</g>
+				</svg>
+				{t`Continue anonymously`}
+			</Button>
+			<Button variant="outline" type="button">
+				<GoogleLogoIcon />
+				{t`Continue with Google`}
+			</Button>
+		</div>
+	)
+}
