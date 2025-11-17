@@ -1,5 +1,6 @@
 import { Effect, Either } from 'effect'
-import { ForbiddenError } from '../db/db-errors'
+import type { MacroMessageDescriptor } from '@/hooks/use-lingui-stub'
+import { ForbiddenError, NotFoundError } from '../db/db-errors'
 import type { UserSession } from '../schemas'
 import { CurrentSession } from './current-session'
 
@@ -11,9 +12,13 @@ import { CurrentSession } from './current-session'
  */
 export type Policy<
 	O = UserSession,
-	E = ForbiddenError,
+	E = ForbiddenError | NotFoundError,
 	R = never,
-> = Effect.Effect<Either.Either<O, ForbiddenError>, E, CurrentSession | R>
+> = Effect.Effect<
+	Either.Either<O, ForbiddenError | NotFoundError>,
+	E,
+	CurrentSession | R
+>
 
 /**
  * Creates a policy from a predicate function that evaluates the current user.
@@ -23,8 +28,8 @@ export const policy = <O, E = never, R = never>(
 	predicate: (
 		session: CurrentSession['Type'],
 	) =>
-		| Either.Either<O, ForbiddenError>
-		| Effect.Effect<Either.Either<O, ForbiddenError>, E, R>,
+		| Either.Either<O, ForbiddenError | NotFoundError>
+		| Effect.Effect<Either.Either<O, ForbiddenError | NotFoundError>, E, R>,
 ): Policy<O, E, R> =>
 	Effect.flatMap(CurrentSession, (session) => {
 		const result = predicate(session)
@@ -39,7 +44,7 @@ export const policy = <O, E = never, R = never>(
 			// This happens often when policies use `orFail` inside them,
 			// but only the top-level usage of `orFail()` should in fact fail
 			Effect.catchAll((error) => {
-				if (error instanceof ForbiddenError) {
+				if (error instanceof ForbiddenError || error instanceof NotFoundError) {
 					return Effect.succeed(Either.left(error))
 				} else {
 					return Effect.fail(error)
@@ -77,8 +82,12 @@ export const allow = <T>(value: T) => Either.right(value)
  *   return deny('Calendar not found')
  * }
  */
-export const deny = (reason?: string) =>
+export const deny = (reason?: MacroMessageDescriptor) =>
 	Either.left(new ForbiddenError({ message: reason }))
+
+export const denyWithNotFound = (
+	data: ConstructorParameters<typeof NotFoundError>[0],
+) => Either.left(new NotFoundError(data))
 
 /**
  * Converts a policy Either into a throwing Effect.
@@ -90,7 +99,7 @@ export const deny = (reason?: string) =>
  */
 export const orFail = <O, E, R>(
 	policy: Policy<O, E, R>,
-): Effect.Effect<O, ForbiddenError | E, CurrentSession | R> =>
+): Effect.Effect<O, ForbiddenError | NotFoundError | E, CurrentSession | R> =>
 	Effect.flatMap(
 		policy,
 		Either.match({

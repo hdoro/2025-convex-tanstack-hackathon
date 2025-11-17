@@ -1,5 +1,6 @@
 import type { Id, TableNames } from '@db/_generated/dataModel'
 import { Data } from 'effect'
+import type { MacroMessageDescriptor } from '@/hooks/use-lingui-stub'
 
 export class NotFoundError extends Data.TaggedError('NotFoundError')<{
 	docId?: Id<TableNames>
@@ -7,7 +8,7 @@ export class NotFoundError extends Data.TaggedError('NotFoundError')<{
 }> {}
 
 export class ForbiddenError extends Data.TaggedError('ForbiddenError')<{
-	message?: string | undefined
+	message?: MacroMessageDescriptor | undefined
 }> {}
 
 export class InvalidCtxError extends Data.TaggedError('InvalidCtxError')<{}> {}

@@ -13,9 +13,8 @@ export const confectSchema = defineSchema({
 
 	// User sessions (personal to each user)
 	sessions: defineTable(Session)
-		.index('by_userId', ['userId'])
+		.index('by_userId_status', ['userId', 'status'])
 		.index('by_roomId', ['roomId'])
-		.index('by_status', ['status'])
 		.index('by_userRoom', ['userId', 'roomId']),
 
 	// Work/break cycles within sessions

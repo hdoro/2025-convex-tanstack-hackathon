@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Option, Schema } from 'effect'
 import LoadingScreen from '@/components/loading-screen'
 import NotFoundScreen from '@/components/not-found-screen'
+import RoomScreen from '@/components/room-screen'
 import { Button } from '@/components/ui/button'
 import {
 	AskToJoinRoomArgs,
@@ -44,7 +45,8 @@ function RouteComponent() {
 					</div>
 				)
 
-			if (result.access === 'allowed') return <div>You're into the room</div>
+			if (result.access === 'allowed') return <RoomScreen room={result.room} />
+
 			return null
 		},
 	})

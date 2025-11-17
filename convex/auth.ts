@@ -51,7 +51,7 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 
 				const sessions = await ctx.db
 					.query('sessions')
-					.withIndex('by_userId', (q) => q.eq('userId', doc._id))
+					.withIndex('by_userId_status', (q) => q.eq('userId', doc._id))
 					.collect()
 
 				await Promise.all(sessions.map((session) => ctx.db.delete(session._id)))

@@ -14,6 +14,7 @@ import type * as http from "../http.js";
 import type * as presence from "../presence.js";
 import type * as resend from "../resend.js";
 import type * as rooms from "../rooms.js";
+import type * as sessions from "../sessions.js";
 import type * as userProfiles from "../userProfiles.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   presence: typeof presence;
   resend: typeof resend;
   rooms: typeof rooms;
+  sessions: typeof sessions;
   userProfiles: typeof userProfiles;
 }>;
 

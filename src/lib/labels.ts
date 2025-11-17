@@ -1,9 +1,9 @@
 import { type MacroMessageDescriptor, msg } from '@/hooks/use-lingui-stub'
 import type {
 	CycleDebrief,
-	CycleIntention,
+	CycleIntentions,
 	SessionDebrief,
-	SessionIntention,
+	SessionIntentions,
 	SupportedLocale,
 } from './schemas'
 
@@ -24,7 +24,7 @@ export const CYCLE_DEBRIEF_LABELS: Record<
 }
 
 export const CYCLE_INTENTIONS_LABELS: Record<
-	keyof CycleIntention,
+	keyof CycleIntentions,
 	MacroMessageDescriptor
 > = {
 	energyLevel: msg`Your energy and alertness`,
@@ -46,7 +46,7 @@ export const SESSION_DEBRIEF_LABELS: Record<
 }
 
 export const SESSION_INTENTIONS_LABELS: Record<
-	keyof SessionIntention,
+	keyof SessionIntentions,
 	MacroMessageDescriptor
 > = {
 	goal: msg`What are you trying to accomplish?`,
