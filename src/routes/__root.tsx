@@ -17,7 +17,6 @@ import { getCookie, getRequest } from '@tanstack/react-start/server'
 import type { ConvexReactClient } from 'convex/react'
 import type { PropsWithChildren } from 'react'
 import NotFoundScreen from '@/components/not-found-screen'
-import { SettingsMenu } from '@/components/settings-menu'
 import { getRandomItemFromArray } from '@/lib/arrays'
 import { THEME_COOKIE_KEY } from '@/lib/constants'
 import { isValidTheme, type Theme, themes } from '@/lib/themes'
@@ -112,11 +111,10 @@ function RootDocument(props: PropsWithChildren<{ theme: Theme }>) {
 			</head>
 			<body>
 				<ThemeProvider theme={props.theme}>
-					<SettingsMenu />
 					{props.children}
 					<TanStackDevtools
 						config={{
-							position: 'bottom-right',
+							position: 'bottom-left',
 						}}
 						plugins={[
 							{

@@ -8,7 +8,7 @@ import {
 	useContext,
 	useState,
 } from 'react'
-import { useColorMode } from '@/hooks/use-color-mode'
+import { ThemeSelector } from '@/components/theme-selector'
 import { THEME_COOKIE_KEY } from '@/lib/constants'
 import { themePresetToCssCustomProperties } from '@/lib/theme-helpers'
 import { Theme } from '@/lib/themes'
@@ -24,7 +24,6 @@ export default function ThemeProvider(
 	props: PropsWithChildren<{ theme: Theme }>,
 ) {
 	const [theme, setTheme] = useState<Theme>(props.theme)
-	const colorMode = useColorMode()
 
 	async function onThemeChange(theme: Theme) {
 		setTheme(theme)
@@ -36,14 +35,29 @@ export default function ThemeProvider(
 	}
 	return (
 		<ThemeContext.Provider value={{ theme, setTheme: onThemeChange }}>
-			<div
-				className="contents"
-				style={themePresetToCssCustomProperties(theme, colorMode)}
-			>
-				{props.children}
-			</div>
+			{props.children}
+
+			<ThemeSelector />
+			{/* biome-ignore lint: this is the best way to do SSR-ready theming */}
+			<style dangerouslySetInnerHTML={{ __html: getDarkModeStyles(theme) }} />
 		</ThemeContext.Provider>
 	)
+}
+
+function getDarkModeStyles(theme: Theme) {
+	return `
+	:root {
+      ${Object.entries(themePresetToCssCustomProperties(theme, 'light'))
+				.map(([key, value]) => `${key}: ${value};`)
+				.join('\n')}
+    }
+	@media (prefers-color-scheme: dark) {
+    :root {
+      ${Object.entries(themePresetToCssCustomProperties(theme, 'dark'))
+				.map(([key, value]) => `${key}: ${value};`)
+				.join('\n')}
+    }
+  }`
 }
 
 export const setThemeCookie = createServerFn({ method: 'POST' })
