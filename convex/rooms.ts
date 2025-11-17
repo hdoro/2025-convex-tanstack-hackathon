@@ -29,7 +29,7 @@ export const create = mutation({
 				timer: Timer.make({
 					duration: DEFAULT_BREAK_DURATION,
 					events: [],
-					version: 0,
+					version: 1,
 				}),
 				visibility: 'private',
 			})

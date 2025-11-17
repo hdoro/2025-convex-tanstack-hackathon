@@ -87,6 +87,7 @@ export type Session = typeof Session.Type
 
 export const Cycle = Schema.Struct({
 	sessionId: Id.Id('sessions'),
+	userId: UserId,
 	startedAt: Schema.Date,
 	endedAt: Schema.Date,
 	intention: Schema.optional(CycleIntention),

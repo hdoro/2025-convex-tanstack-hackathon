@@ -41,6 +41,20 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 				if (userProfile) {
 					await ctx.db.delete(userProfile._id)
 				}
+
+				const cycles = await ctx.db
+					.query('cycles')
+					.withIndex('by_userId', (q) => q.eq('userId', doc._id))
+					.collect()
+
+				await Promise.all(cycles.map((cycle) => ctx.db.delete(cycle._id)))
+
+				const sessions = await ctx.db
+					.query('sessions')
+					.withIndex('by_userId', (q) => q.eq('userId', doc._id))
+					.collect()
+
+				await Promise.all(sessions.map((session) => ctx.db.delete(session._id)))
 			},
 		},
 	},
