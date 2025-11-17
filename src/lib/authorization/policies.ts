@@ -1,3 +1,4 @@
+import type { Id } from '@db/_generated/dataModel'
 import { Effect } from 'effect'
 import type {
 	ActiveUserSession,
@@ -42,20 +43,7 @@ export const requireRoomOwner = (room: Room) =>
 		return allow(room)
 	})
 
-export const requireReadableRoom = (room: Room) =>
-	policy(() =>
-		Effect.gen(function* () {
-			yield* orFail(requireActiveUser)
-
-			if (room.visibility === 'public') return allow(room)
-
-			// If not public, only the owner can see
-			yield* orFail(requireRoomOwner(room))
-			return allow(room)
-		}),
-	)
-
-export const requireEditableRoom = (room: Room) =>
+export const requireEditableRoom = (room: Room & { _id: Id<'rooms'> }) =>
 	policy(() =>
 		Effect.gen(function* () {
 			yield* orFail(requireActiveUser)

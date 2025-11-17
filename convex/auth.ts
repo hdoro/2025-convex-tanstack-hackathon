@@ -55,6 +55,15 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 					.collect()
 
 				await Promise.all(sessions.map((session) => ctx.db.delete(session._id)))
+
+				const roomsAccess = await ctx.db
+					.query('roomsAccess')
+					.withIndex('by_userId', (q) => q.eq('userId', doc._id))
+					.collect()
+
+				await Promise.all(
+					roomsAccess.map((access) => ctx.db.delete(access._id)),
+				)
 			},
 		},
 	},

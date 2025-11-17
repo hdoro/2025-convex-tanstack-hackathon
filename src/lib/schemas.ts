@@ -71,9 +71,15 @@ export const Room = Schema.Struct({
 	timer: Timer,
 	cycleDuration: Schema.Duration,
 	breakDuration: Schema.Duration,
-	visibility: Schema.Literal('private', 'public'),
 })
 export type Room = typeof Room.Type
+
+export const RoomAccess = Schema.Struct({
+	roomId: Id.Id('rooms'),
+	userId: UserId,
+	access: Schema.Literal('pending', 'allowed', 'denied'),
+})
+export type RoomAccess = typeof RoomAccess.Type
 
 export const Session = Schema.Struct({
 	userId: UserId,
@@ -141,7 +147,18 @@ export const UpdateRoomArgs = Schema.Struct({
 	id: Id.Id('rooms'),
 })
 export const GetRoomByHandleArgs = Room.pick('handle')
-export const GetRoomByHandleResult = Schema.Option(Room)
+export const GetRoomByHandleResult = Schema.Union(
+	Schema.Struct({
+		access: Schema.Literal('allowed'),
+		room: Room,
+	}),
+	Schema.Struct({
+		access: Schema.Literal('pending', 'denied', 'not-requested'),
+	}),
+	Schema.Null,
+)
+export const AskToJoinRoomArgs = Room.pick('handle')
+export const AskToJoinRoomResult = Schema.Null
 
 export const GetCurrentUserProfileArgs = Schema.Struct({})
 export const GetCurrentUserProfileReturn = UserSession

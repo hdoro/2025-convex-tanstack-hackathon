@@ -1,9 +1,10 @@
-import { Effect, Option, Schema } from 'effect'
+import { Effect, Either, Option, Schema } from 'effect'
 import { Policies } from '@/lib/authorization'
 import { DEFAULT_BREAK_DURATION, DEFAULT_CYCLE_DURATION } from '@/lib/constants'
 import { dbEffect } from '@/lib/db/db-effect'
 import { createRoomHandle } from '@/lib/handles'
 import {
+	AskToJoinRoomArgs,
 	CreateRoomArgs,
 	CreateRoomResult,
 	GetRoomByHandleArgs,
@@ -34,7 +35,6 @@ export const create = mutation({
 						events: [],
 						version: 1,
 					}),
-					visibility: 'private',
 				})
 
 				return { handle }
@@ -53,9 +53,41 @@ export const update = mutation({
 				const room = yield* db.get(id)
 				if (Option.isNone(room)) return null
 
-				yield* Policies.orFail(Policies.requireReadableRoom(room.value))
+				yield* Policies.orFail(Policies.requireEditableRoom(room.value))
 
 				yield* db.patch(id, toUpdate)
+
+				return null
+			}),
+		),
+})
+
+export const askToJoin = mutation({
+	args: AskToJoinRoomArgs,
+	returns: Schema.Null,
+	handler: ({ handle }) =>
+		dbEffect(
+			Effect.gen(function* () {
+				const currentSession = yield* Policies.orFail(
+					Policies.requireActiveUser,
+				)
+				const { db } = yield* ConfectMutationCtx
+				const room = yield* db
+					.query('rooms')
+					.withIndex('by_handle', (q) => q.eq('handle', handle))
+					.unique()
+
+				if (Option.isNone(room)) return null
+
+				// Skip requesting access if already owner
+				const isOwnerResult = yield* Policies.requireRoomOwner(room.value)
+				if (Either.isRight(isOwnerResult)) return null
+
+				yield* db.insert('roomsAccess', {
+					roomId: room.value._id,
+					access: 'pending',
+					userId: currentSession.userId,
+				})
 
 				return null
 			}),
@@ -68,16 +100,45 @@ export const getByHandle = query({
 	handler: ({ handle }) =>
 		dbEffect(
 			Effect.gen(function* () {
+				const currentSession = yield* Policies.orFail(
+					Policies.requireActiveUser,
+				)
 				const { db } = yield* ConfectQueryCtx
 				const room = yield* db
 					.query('rooms')
 					.withIndex('by_handle', (q) => q.eq('handle', handle))
 					.unique()
 
-				if (Option.isNone(room)) return Option.none()
+				if (Option.isNone(room)) return null
 
-				yield* Policies.orFail(Policies.requireReadableRoom(room.value))
-				return room
+				// Owner can always see
+				const isOwnerResult = yield* Policies.requireRoomOwner(room.value)
+				if (Either.isRight(isOwnerResult))
+					return { access: 'allowed', room: room.value }
+
+				const accessDoc = yield* db
+					.query('roomsAccess')
+					.withIndex('by_roomId_userId', (q) =>
+						q.eq('roomId', room.value._id).eq('userId', currentSession.userId),
+					)
+					.first()
+
+				if (Option.isNone(accessDoc)) {
+					return {
+						access: 'not-requested',
+					}
+				}
+
+				if (accessDoc.value.access === 'allowed') {
+					return {
+						access: 'allowed',
+						room: room.value,
+					}
+				}
+
+				return {
+					access: accessDoc.value.access,
+				}
 			}),
 		),
 })

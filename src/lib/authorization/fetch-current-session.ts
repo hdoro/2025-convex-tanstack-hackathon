@@ -1,5 +1,5 @@
-import { ConfectMutationCtx, ConfectQueryCtx } from '@db/confect'
 import { Effect, Option } from 'effect'
+import { getCtxWithQueries } from '../db/get-ctx-with-queries'
 import type { ActiveUserSession, InactiveUserSession } from '../schemas'
 import { SupportedLocale, type UserId } from '../schemas'
 
@@ -7,18 +7,8 @@ const TOKEN_SUB_CLAIM_DIVIDER = '|'
 
 export const fetchCurrentSession = Effect.fn('fetchCurrentSession')(
 	function* () {
-		const queryCtx = yield* Effect.serviceOption(ConfectQueryCtx)
-		const mutationCtx = yield* Effect.serviceOption(ConfectMutationCtx)
+		const { db, auth } = yield* getCtxWithQueries
 
-		const ctx = Option.isSome(queryCtx)
-			? queryCtx.value
-			: Option.isSome(mutationCtx)
-				? mutationCtx.value
-				: null
-
-		if (!ctx) return yield* Effect.fail(new Error('Neither service available'))
-
-		const { db, auth } = ctx
 		const identityResult = yield* auth.getUserIdentity()
 
 		if (Option.isNone(identityResult)) return null

@@ -10,6 +10,8 @@ export class ForbiddenError extends Data.TaggedError('ForbiddenError')<{
 	message?: string | undefined
 }> {}
 
+export class InvalidCtxError extends Data.TaggedError('InvalidCtxError')<{}> {}
+
 export class GetUserIdentityError extends Data.TaggedError(
 	'GetUserIdentityError',
 )<{

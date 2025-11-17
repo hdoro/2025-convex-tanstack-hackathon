@@ -1,12 +1,15 @@
 import { defineSchema, defineTable } from '@rjdellecese/confect/server'
-import { Cycle, Room, Session, UserProfile } from '@/lib/schemas'
+import { Cycle, Room, RoomAccess, Session, UserProfile } from '@/lib/schemas'
 
 export const confectSchema = defineSchema({
 	// Rooms with permanent shareable spaces
 	rooms: defineTable(Room)
 		.index('by_createdBy', ['createdBy'])
-		.index('by_handle', ['handle'])
-		.index('by_visibility', ['visibility']),
+		.index('by_handle', ['handle']),
+
+	roomsAccess: defineTable(RoomAccess)
+		.index('by_roomId_userId', ['roomId', 'userId'])
+		.index('by_userId', ['userId']),
 
 	// User sessions (personal to each user)
 	sessions: defineTable(Session)
