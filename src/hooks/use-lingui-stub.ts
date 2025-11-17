@@ -5,7 +5,15 @@
  */
 export function useLingui() {
 	return {
-		t: plainString,
+		t: (
+			stringOrTemplateString: TemplateStringsArray | MacroMessageDescriptor,
+			...values: unknown[]
+		) => {
+			if (typeof stringOrTemplateString === 'string')
+				return stringOrTemplateString
+
+			return plainString(stringOrTemplateString, ...values)
+		},
 	}
 }
 
