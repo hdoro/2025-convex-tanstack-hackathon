@@ -1,5 +1,7 @@
 import { Effect, Option, Schema } from 'effect'
+import { Policies } from '@/lib/authorization'
 import { DEFAULT_BREAK_DURATION, DEFAULT_CYCLE_DURATION } from '@/lib/constants'
+import { dbEffect } from '@/lib/db/db-effect'
 import { createRoomHandle } from '@/lib/handles'
 import {
 	CreateRoomArgs,
@@ -8,7 +10,6 @@ import {
 	GetRoomByHandleResult,
 	Timer,
 	UpdateRoomArgs,
-	UserId,
 } from '@/lib/schemas'
 import { ConfectMutationCtx, ConfectQueryCtx, mutation, query } from './confect'
 
@@ -16,55 +17,67 @@ export const create = mutation({
 	args: CreateRoomArgs,
 	returns: CreateRoomResult,
 	handler: () =>
-		Effect.gen(function* () {
-			const { db } = yield* ConfectMutationCtx
+		dbEffect(
+			Effect.gen(function* () {
+				const { db } = yield* ConfectMutationCtx
+				const session = yield* Policies.orFail(Policies.requireActiveUser)
 
-			const handle = createRoomHandle()
-			yield* db.insert('rooms', {
-				breakDuration: DEFAULT_BREAK_DURATION,
-				cycleDuration: DEFAULT_CYCLE_DURATION,
-				createdBy: UserId.make('@TODO get current user'),
-				currentPhase: 'work',
-				handle,
-				timer: Timer.make({
-					duration: DEFAULT_BREAK_DURATION,
-					events: [],
-					version: 1,
-				}),
-				visibility: 'private',
-			})
+				const handle = createRoomHandle()
+				yield* db.insert('rooms', {
+					breakDuration: DEFAULT_BREAK_DURATION,
+					cycleDuration: DEFAULT_CYCLE_DURATION,
+					createdBy: session.userId,
+					currentPhase: 'work',
+					handle,
+					timer: Timer.make({
+						duration: DEFAULT_BREAK_DURATION,
+						events: [],
+						version: 1,
+					}),
+					visibility: 'private',
+				})
 
-			return { handle }
-		}),
+				return { handle }
+			}),
+		),
 })
 
 export const update = mutation({
 	args: UpdateRoomArgs,
 	returns: Schema.Null,
 	handler: ({ id, ...toUpdate }) =>
-		Effect.gen(function* () {
-			const { db } = yield* ConfectMutationCtx
-			yield* db.patch(id, toUpdate)
-			// @TODO get current user and ensure only the creator can modify the room
+		dbEffect(
+			Effect.gen(function* () {
+				const { db } = yield* ConfectMutationCtx
 
-			return null
-		}),
+				const room = yield* db.get(id)
+				if (Option.isNone(room)) return null
+
+				yield* Policies.orFail(Policies.requireReadableRoom(room.value))
+
+				yield* db.patch(id, toUpdate)
+
+				return null
+			}),
+		),
 })
 
 export const getByHandle = query({
 	args: GetRoomByHandleArgs,
 	returns: GetRoomByHandleResult,
 	handler: ({ handle }) =>
-		Effect.gen(function* () {
-			const { db, auth } = yield* ConfectQueryCtx
-			const room = yield* db
-				.query('rooms')
-				.withIndex('by_handle', (q) => q.eq('handle', handle))
-				.unique()
+		dbEffect(
+			Effect.gen(function* () {
+				const { db } = yield* ConfectQueryCtx
+				const room = yield* db
+					.query('rooms')
+					.withIndex('by_handle', (q) => q.eq('handle', handle))
+					.unique()
 
-			const identity = yield* auth.getUserIdentity()
-			console.log(identity)
+				if (Option.isNone(room)) return Option.none()
 
-			return room
-		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none()))),
+				yield* Policies.orFail(Policies.requireReadableRoom(room.value))
+				return room
+			}),
+		),
 })
